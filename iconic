@@ -22,7 +22,7 @@
 #       2019-11-04 Make icon name searchable in Sort Icons scroll box.
 #       2020-06-02 Clean up some comments.
 
-# NOTE: You can setup "~/Desktop/iconic.desktop" with +x bit set like so:
+# NOTE: You can setup "$ICONS_DIR/iconic.desktop" with +x bit set like so:
 
 #       [Desktop Entry]
 #       Name=iconic
@@ -36,6 +36,8 @@
 
 #       Where +4500+150 is multiple monitor offset. Most use +0+0 instead.
 #       Where "desktop" = icon. Another option could be "computer", etc.
+#       Where $ICONS_DIR is the path of your desktop directory (~/Desktop
+#         by default.)
 
 # TODO: Don't allow sudo which might change icon file ownership
 #       Better handling of key in use.
@@ -45,7 +47,9 @@
 MON_ICON_ROWS="9"
 MON_ICON_COLUMNS="18"
 ConfigFilename=~/.iconic
-ICONS_DIR="/home/$USER/Desktop"
+
+test -f ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs && source ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs
+ICONS_DIR=${XDG_DESKTOP_DIR:-$HOME/Desktop}
 
 ### Dependancies ###
 
@@ -491,7 +495,7 @@ SetColsAndRows () {
 
 BuildIconsArr () {
 
-    # Read through ~/Desktop and get names, date modified and screen positions
+    # Read through $ICONS_DIR and get names, date modified and screen positions
 
     local i File Type Date Position X Y
 
@@ -1162,7 +1166,7 @@ SetMonitor () {
 Main () {
 
     ReadConfiguration   # Read ~/.iconic from disk into array $CfgArr
-    BuildIconsArr       # Read ~/Desktop to get icons into array $IconsArr
+    BuildIconsArr       # Read $ICONS_DIR to get icons into array $IconsArr
 
     if [[ "$fDumpConfig" == true ]] ; then
         DumpConfig
