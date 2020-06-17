@@ -47,6 +47,25 @@ MON_ICON_COLUMNS="18"
 ConfigFilename=~/.iconic
 ICONS_DIR="/home/$USER/Desktop"
 
+if [ -f /usr/bin/gio ]
+then
+    get_icon_position () {
+        gio info -a 'metadata::nautilus-icon-position' $1
+    }
+
+    set_attribute () {
+        gio set -t string $1 $2 $3
+    }
+else
+    get_icon_position () {
+        gvfs-info -a 'metadata::nautilus-icon-position' $1
+    }
+
+    set_attribute () {
+        gvfs-set-attribute -t string $1 $2 $3
+    }
+fi
+
 ### Dependancies ###
 
 command -v yad >/dev/null 2>&1 || { echo >&2 \
@@ -510,7 +529,7 @@ BuildIconsArr () {
         Linkless="${File##*/}"
         Linkless=${Linkless#"Link to "}
         
-        Position=$(gvfs-info -a 'metadata::nautilus-icon-position' "$File")
+        Position=$(get_icon_position "$File")
         Position="${Position##* }" # Remove noise up to " x,y" at end
 
         X=$(cut -d',' -f1 <<< "$Position")
@@ -927,7 +946,7 @@ TestIcons () {
     for (( i=0; i<${#IconsArr[@]}; i=i+ICON_FLD_CNT )) ; do
         File="$ICONS_DIR"/"${IconsArr[((i+ICON_NAME_NDX))]}"
         Position="${IconsArr[((i+ICON_COL_NDX))]},${IconsArr[((i+ICON_ROW_NDX))]}"
-        gvfs-set-attribute -t string "$File" \
+        set_attribute "$File" \
                 'metadata::nautilus-icon-position' "$Position"
     done
 
@@ -949,7 +968,7 @@ TestIcons () {
     for (( i=0; i<${#OldIconsArr[@]}; i=i+ICON_FLD_CNT )) ; do
         File="$ICONS_DIR"/"${OldIconsArr[((i+ICON_NAME_NDX))]}"
         Position="${OldIconsArr[((i+ICON_COL_NDX))]},${OldIconsArr[((i+ICON_ROW_NDX))]}"
-        gvfs-set-attribute -t string "$File" \
+        set_attribute "$File" \
                 'metadata::nautilus-icon-position' "$Position"
 
     done
